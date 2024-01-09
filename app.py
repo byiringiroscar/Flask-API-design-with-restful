@@ -1,33 +1,19 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, abort, reqparse
-
-from flask_swagger_ui import get_swaggerui_blueprint
+from flasgger import Swagger, swag_from
+from config.swagger import template, swagger_config
 
 
 app = Flask(__name__)
+SWAGGER={
+                'title': "Bookmarks API",
+                'uiversion': 3
+            }
 
-SWAGGER_URL = '/swagger'  # URL for exposing Swagger UI (without trailing '/')
-API_URL = 'http://petstore.swagger.io/v2/swagger.json'  # Our API url (can of course be a local resource)
-
-# Call factory function to create our blueprint
-swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
-    API_URL,
-    config={  # Swagger UI config overrides
-        'app_name': "Test application"
-    },
-    # oauth_config={  # OAuth config. See https://github.com/swagger-api/swagger-ui#oauth2-configuration .
-    #    'clientId': "your-client-id",
-    #    'clientSecret': "your-client-secret-if-required",
-    #    'realm': "your-realms",
-    #    'appName': "your-app-name",
-    #    'scopeSeparator': " ",
-    #    'additionalQueryStringParams': {'test': "hello"}
-    # }
-)
 
 
 api = Api(app)
+Swagger(app, config=swagger_config, template=template)
 
 
 TODOS = {
@@ -46,6 +32,18 @@ parser.add_argument('task')
 
 class HelloWorld(Resource):
     def get(self):
+        """
+        This examples uses FlaskRESTful Resource
+        It works also with swag_from, schemas and spec_dict
+        ---
+        responses:
+          200:
+            description: User all
+
+          401:
+             description: Fails to get items due to authentication error
+          
+        """
         return TODOS
 
 
@@ -70,5 +68,4 @@ api.add_resource(TodoSimple, '/<string:todo_id>')
 
 
 if __name__ == '__main__':
-    app.register_blueprint(swaggerui_blueprint)
     app.run(debug=True)
